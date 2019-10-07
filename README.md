@@ -12,7 +12,7 @@
 
 | Модель | Ссылка на магазин |
 |--|--|
-| ![](https://wiki.iarduino.ru/img/resources/922/922.svg) | https://wiki.iarduino.ru/page/multi-servo-shield-na-16-servoprivodov/) |
+| ![](https://wiki.iarduino.ru/img/resources/922/922.svg) | https://iarduino.ru/shop/Sensory-Datchiki/imu-9.html |
 
 ## Описание библиотеки:
 
