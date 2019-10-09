@@ -6,7 +6,7 @@
 
 **Данная библиотека для Arduino IDE позвляет управлять Trema-модулем [IMU-сенсор на 9 степеней свободы](https://iarduino.ru/shop/Sensory-Datchiki/imu-9.html)**
 
-> Подробнее про установку библиотеки читайте в нашей [инструкции](https://wiki.iarduino.ru/page/Installing_librari/).
+> Подробнее про установку библиотеки читайте в нашей [инструкции](https://wiki.iarduino.ru/page/Installing_libraries/).
 
 > Подробнее про подключение к [Arduino UNO](https://iarduino.ru/shop/boards/arduino-uno-r3.html)/[Piranha UNO](https://iarduino.ru/shop/boards/piranha-uno-r3.html) читайте на нашей [wiki](https://wiki.iarduino.ru/page/Trema_IMU9/)
 
