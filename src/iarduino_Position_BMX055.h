@@ -1,5 +1,5 @@
 //	Библиотека для работы с Trema модулем IMU 9 DOF на базе чипа BMX055. http://iarduino.ru/shop/Expansion-payments/imu-sensor-na-9-stepeney-svobody-trema-modul-v2-0.html
-//  Версия: 1.0.3
+//  Версия: 1.1.0
 //  Последнюю версию библиотеки Вы можете скачать по ссылке: http://iarduino.ru/file/337.html
 //  Подробное описание функции бибилиотеки доступно по ссылке: http://wiki.iarduino.ru/page/Trema_IMU9/
 //  Библиотека является собственностью интернет магазина iarduino.ru и может свободно использоваться и распространяться!
