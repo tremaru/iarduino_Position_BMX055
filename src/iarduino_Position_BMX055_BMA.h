@@ -87,46 +87,48 @@
 #define REG_BMA_FIFO_CONFIG_1	0x3E		//	Настройки конфигурации буфера FIFO		|	fifo_mode<1:0>		| -	- -	- -	- -	- -	- -	- -	- -	- -	- -	- -	- -	| fifo_data_select<1:0>	| 0x00	|	fifo_mode<1:0> - выбор режима работы буфера FIFO: «00» BYPASS (глубина буфера 1 кадр, старые данные стираются); «01» FIFO (сбор данных прекращается при полном заполнении буфера - 32 кадра); «10» STREAM (сбор данных продолжается при полном заполнении буфера, старые кадры стираются), fifo_data_select<1:0> - выбор данных для буфера FIFO: «00» собираются данные всех осей XYZ; «01» собираются данные только оси X; «10» собираются данные только оси Y; «11» собираются данные только оси Z. При записи данных в регистр FIFO_CONFIG_1, память FIFO буфера и флаг fifo-full очищается.
 #define REG_BMA_FIFO_DATA		0x3F		//	Регистр чтения данных из буфера FIFO	|										fifo_data<7:0>											| 0x00	|	fifo_data<7:0> - байт для чтения данных из буфера FIFO. Данные буфера FIFO хранятся кадрами (объём буфера равен 32 кадра). Состав кадра зависит от значения битов fifo_data_select<1:0> регистра REG_BMA_FIFO_CONFIG_1: Если выбраны данные всех осей XYZ, то каждый кадр считывается побайтно в следующем порядке X-lsb, X-msb, Y-lsb, Y-msb, Z-lsb, Z-msb; Если выбраны данные только оси X, то каждый кадр считывается побайтно в следующем порядке X-lsb, X-msb; Если выбраны данные только оси Y или только оси Z, то каждый кадр считывается побайтно, как и для оси X. Если чтение буфера остановлено и кадр считан не полностью, то при следующей инициализации чтения в fifo_data<7:0> будет находиться пербый байт следующего кадра.
 
+#include "iarduino_RTC_I2C.h"																									//	Подключаем файл iarduino_RTC_I2C.h - для работы с шиной I2C
+																																//
 class iarduino_Position_BMX055_BMA: public iarduino_Position_BMX055_BASE{														//
 	public:																														//
 	/**	функции доступные пользователю **/																						//
 //		Инициализация датчика:																									//
-		bool	begin(bool setZero,float*ptrX,float*ptrY,float*ptrZ,float*ptrT,float*ptrQ1,float*ptrQ2,float*ptrQ3,float*ptrQ4){//	Аргументы: setZero - флаг указывающий о необходимости установить текущие показания в 0, указатели на переменные выводимых данных)
-					axisX=ptrX;																									//	Присваиваем указателю axisX адрес из указателя ptrX который ссылается на переменную axisX класса iarduino_Position_BMX055 предназначенную для вывода данных по оси X
-					axisY=ptrY;																									//	Присваиваем указателю axisY адрес из указателя ptrY который ссылается на переменную axisY класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Y
-					axisZ=ptrZ;																									//	Присваиваем указателю axisZ адрес из указателя ptrZ который ссылается на переменную axisZ класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Z
-					temp =ptrT;																									//	Присваиваем указателю temp  адрес из указателя ptrT который ссылается на переменную temp  класса iarduino_Position_BMX055 предназначенную для вывода температуры
-					objI2C.begin(100);																							//	Инициируем работу по шине I2C на скорости 100 кГц
-					if (objI2C.readByte(BMA_ADDRES, REG_BMA_CHIPID) != BMA_ID){return false;}									//	Возвращаем ошибку если содержимое регистра REG_BMA_CHIPID не совпало с реальным ID чипа указанным в константе BMA_ID
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_RESET, 0xB6);															//	Выполняем программную перезагрузку (записываем значение 0xB6 в регистр REG_BMA_RESET)
+		bool	begin(iarduino_I2C_Select* ptrI2C, bool setZero, float*ptrX,float*ptrY,float*ptrZ,float*ptrT, float*ptrQ1,float*ptrQ2,float*ptrQ3,float*ptrQ4){ // Аргументы: ptrI2C - указатель на объект работы с шиной I2C, setZero - флаг указывающий о необходимости установить текущие показания в 0, указатели на переменные выводимых данных)
+					selI2C = ptrI2C;																							//	Присваиваем указателю selI2C адрес из указателя ptrI2C
+					axisX  = ptrX;																								//	Присваиваем указателю axisX  адрес из указателя ptrX который ссылается на переменную axisX класса iarduino_Position_BMX055 предназначенную для вывода данных по оси X
+					axisY  = ptrY;																								//	Присваиваем указателю axisY  адрес из указателя ptrY который ссылается на переменную axisY класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Y
+					axisZ  = ptrZ;																								//	Присваиваем указателю axisZ  адрес из указателя ptrZ который ссылается на переменную axisZ класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Z
+					temp   = ptrT;																								//	Присваиваем указателю temp   адрес из указателя ptrT который ссылается на переменную temp  класса iarduino_Position_BMX055 предназначенную для вывода температуры
+					if( selI2C->readByte(BMA_ADDRES, REG_BMA_CHIPID) != BMA_ID ){ return false; }								//	Возвращаем ошибку если содержимое регистра REG_BMA_CHIPID не совпало с реальным ID чипа указанным в константе BMA_ID
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_RESET, 0xB6);															//	Выполняем программную перезагрузку (записываем значение 0xB6 в регистр REG_BMA_RESET)
 					delay(100);																									//	Ждём сброса регистров
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_LPW, 0x00);															//	Переводим акселеромерт в нормальный режим питания (сбрасываем флаги suspend, lowpower_en и deep_suspend)
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_LPW, 0x00);															//	Переводим акселеромерт в нормальный режим питания (сбрасываем флаги suspend, lowpower_en и deep_suspend)
 					setScale(varRanges);																						//	Устанавливаем диапазон измерений акселерометра (указывая предел измеряемого углового ускорения)
 					setBandwidths(varBandwidth);																				//	Устанавливаем пропускную способность акселерометра (указывая частоту обновления фильтрованных данных)
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_D_HBW, 0x00);															//	Указываем акселерометру, что требуется выводить отфильтрованные данные (dataHigh_bw=0) с механизмом их затенения во время чтения (shadow_dis=0). Затенение осначает что значение регистров данных не будет изменяться от начала и до конца пакетного чтения
-					if(setZero){setFastOffset(BMA);}																			//	Выполняем быструю компенсацию смещения данных (значение всех осей сбросятся в ноль, если данные текущих уговвых ускорений были меньше ±1g.)
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_D_HBW, 0x00);															//	Указываем акселерометру, что требуется выводить отфильтрованные данные (dataHigh_bw=0) с механизмом их затенения во время чтения (shadow_dis=0). Затенение осначает что значение регистров данных не будет изменяться от начала и до конца пакетного чтения
+					if( setZero ){ setFastOffset(BMA); }																		//	Выполняем быструю компенсацию смещения данных (значение всех осей сбросятся в ноль, если данные текущих уговвых ускорений были меньше ±1g.)
 					return true;																								//
 		}																														//
 																																//
 //		Самотестирование датчика:																								//
 		uint8_t	test(void){																										//	Аргумент: отсутствует
-					if (objI2C.readByte(BMA_ADDRES, REG_BMA_CHIPID) != BMA_ID){return BMA_ERR_ID;}								//	Возвращаем ошибку если содержимое регистра REG_BMA_CHIPID не совпало с реальным ID чипа указанным в константе BMA_ID
+					if( selI2C->readByte(BMA_ADDRES, REG_BMA_CHIPID) != BMA_ID ){ return BMA_ERR_ID; }							//	Возвращаем ошибку если содержимое регистра REG_BMA_CHIPID не совпало с реальным ID чипа указанным в константе BMA_ID
 					uint8_t f = 0;																								//	Результат
 					uint8_t	i = varRanges;    setScale(BMA_8G);																	//	Сохраняем установленный ранее диапазон измерения и устанавливаем диапазон 8g
 					uint8_t	j = varBandwidth; setBandwidths(BMA_16Hz);															//	Сохраняем установленную ранее полосу пропускания и устанавливаем полосу пропускания 16Гц
 					float   k[6];												delay( 50);										//	Объявляем массив для получения данных
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x11);	delay(500);	while(!read(true)){}; k[0]=*axisX;	//	Выполняем самотестирование оси X c приложением отрицательной электростатической силы к сердечнику датчика и записываем данные этой оси в k[0]
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x12);	delay(500);	while(!read(true)){}; k[1]=*axisY;	//	Выполняем самотестирование оси Y c приложением отрицательной электростатической силы к сердечнику датчика и записываем данные этой оси в k[1]
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x13);	delay(500);	while(!read(true)){}; k[2]=*axisZ;	//	Выполняем самотестирование оси Z c приложением отрицательной электростатической силы к сердечнику датчика и записываем данные этой оси в k[2]
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x15);	delay(500);	while(!read(true)){}; k[3]=*axisX;	//	Выполняем самотестирование оси X c приложением положительной электростатической силы к сердечнику датчика и записываем данные этой оси в k[3]
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x16);	delay(500);	while(!read(true)){}; k[4]=*axisY;	//	Выполняем самотестирование оси Y c приложением положительной электростатической силы к сердечнику датчика и записываем данные этой оси в k[4]
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x17);	delay(500);	while(!read(true)){}; k[5]=*axisZ;	//	Выполняем самотестирование оси Z c приложением положительной электростатической силы к сердечнику датчика и записываем данные этой оси в k[5]
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x11);	delay(500);	while(!read(true)){}; k[0]=*axisX;	//	Выполняем самотестирование оси X c приложением отрицательной электростатической силы к сердечнику датчика и записываем данные этой оси в k[0]
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x12);	delay(500);	while(!read(true)){}; k[1]=*axisY;	//	Выполняем самотестирование оси Y c приложением отрицательной электростатической силы к сердечнику датчика и записываем данные этой оси в k[1]
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x13);	delay(500);	while(!read(true)){}; k[2]=*axisZ;	//	Выполняем самотестирование оси Z c приложением отрицательной электростатической силы к сердечнику датчика и записываем данные этой оси в k[2]
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x15);	delay(500);	while(!read(true)){}; k[3]=*axisX;	//	Выполняем самотестирование оси X c приложением положительной электростатической силы к сердечнику датчика и записываем данные этой оси в k[3]
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x16);	delay(500);	while(!read(true)){}; k[4]=*axisY;	//	Выполняем самотестирование оси Y c приложением положительной электростатической силы к сердечнику датчика и записываем данные этой оси в k[4]
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x17);	delay(500);	while(!read(true)){}; k[5]=*axisZ;	//	Выполняем самотестирование оси Z c приложением положительной электростатической силы к сердечнику датчика и записываем данные этой оси в k[5]
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_PMU_SELF_TEST, 0x00);	delay( 50);	while(!read(true)){}; 				//	Завершаем самотестирование
 					k[0] = (k[0]>k[3])? k[0]-k[3] : k[3]-k[0];		if(k[0]<0.8){f=BMA_ERR_ST;}									//	Вычисляем разницу между полученными показаниями для оси X. Если разница меньше 0.8g, значит тест не пройден.
 					k[1] = (k[1]>k[4])? k[1]-k[4] : k[4]-k[1];		if(k[1]<0.8){f=BMA_ERR_ST;}									//	Вычисляем разницу между полученными показаниями для оси Y. Если разница меньше 0.8g, значит тест не пройден.
 					k[2] = (k[2]>k[5])? k[2]-k[5] : k[5]-k[2];		if(k[2]<0.4){f=BMA_ERR_ST;}									//	Вычисляем разницу между полученными показаниями для оси Z. Если разница меньше 0.4g, значит тест не пройден.
@@ -138,10 +140,10 @@ class iarduino_Position_BMX055_BMA: public iarduino_Position_BMX055_BASE{							
 //		Чтение данных из датчика:																								//
 		bool	read(uint8_t thisMera){																							//	Аргумент: мера измерения читаемых данных (BMA_M_S / BMA_G / BMA_DEG / BMA_RAD)
 					uint8_t i[7];																								//	Объявляем массив i размером 7 байт
-					if(!objI2C.readBytes(BMA_ADDRES, REG_BMA_X_LSB, i, 7)){return false;}										//	Читаем 7 байт одним пакетом начиная с регистра REG_BMA_X_LSB в массив i
-					if(i[0]&0x01){																								//	Если последний бит данных оси X равен «1» значит данные новые, то ...
-					if(i[2]&0x01){																								//	Если последний бит данных оси Y равен «1» значит данные новые, то ...
-					if(i[4]&0x01){																								//	Если последний бит данных оси Z равен «1» значит данные новые, то ...
+					if( !selI2C->readBytes(BMA_ADDRES, REG_BMA_X_LSB, i, 7) ){ return false; }									//	Читаем 7 байт одним пакетом начиная с регистра REG_BMA_X_LSB в массив i
+					if( i[0]&0x01 ){																							//	Если последний бит данных оси X равен «1» значит данные новые, то ...
+					if( i[2]&0x01 ){																							//	Если последний бит данных оси Y равен «1» значит данные новые, то ...
+					if( i[4]&0x01 ){																							//	Если последний бит данных оси Z равен «1» значит данные новые, то ...
 					//	Получаем данные в количестве ускорений свободного падения:												//
 						*axisX = float(int16_t((int16_t(i[1])<<8) | i[0])>>4) * varQuantum;										//	Получаем результирующее 12-битное значение из частей MSB (i[1]), LSB (i[0]), умножаем его на шаг квантования varQuantum
 						*axisY = float(int16_t((int16_t(i[3])<<8) | i[2])>>4) * varQuantum;										//	Получаем результирующее 12-битное значение из частей MSB (i[3]), LSB (i[2]), умножаем его на шаг квантования varQuantum
@@ -174,7 +176,7 @@ class iarduino_Position_BMX055_BMA: public iarduino_Position_BMX055_BASE{							
 						case BMA_16G:	varQuantum = 16.0/2048.0; i=0x0C; break;												//	Вся шкала 12 бит (±2048) равна ускорению ±16g. Определяем шаг квантования (какому угловому ускорению равно значение «1» из регистра данных на выбранном диапазоне).
 					}																											//
 					varRanges=scale;																							//	Запоминаем выбранный диапазон измерений
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_RANGE, i);																//	Устанавливаем диапазон измерений акселерометра (последние 4 бита регистра REG_BMA_RANGE)
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_RANGE, i);															//	Устанавливаем диапазон измерений акселерометра (последние 4 бита регистра REG_BMA_RANGE)
 		}																														//
 																																//
 //		Установка полосы пропускания для фильтрованных данных:																	//
@@ -192,20 +194,20 @@ class iarduino_Position_BMX055_BMA: public iarduino_Position_BMX055_BASE{							
 						case BMA_1000Hz:	i=0x0F; break;																		//	Для полосы пропускания 1000    Гц, интервал обновлений данных 0.5 мс) нужно записать i в биты bw<4:0> регистра REG_BMA_BW.
 					}																											//
 					varBandwidth=bandwidths;																					//	Запоминаем выбранную полосу пропускания
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_BW, i);																//	Устанавливаем пропускную способность акселерометра (последние 4 бита регистра REG_BMA_BW).
+					selI2C->writeByte(BMA_ADDRES, REG_BMA_BW, i);																//	Устанавливаем пропускную способность акселерометра (последние 4 бита регистра REG_BMA_BW).
 		}																														//
 																																//
 //		Выполнение быстрой компенсации смещения данных:																			//
 		void	setFastOffset(uint8_t offset){																					//	Аргумент: не имеет значения.
-					uint8_t i;																									//
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x80);													//	Сбрасываем все значения регистров компенсаций смещения в 0 (установкой флага offset_reset)
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_OFC_SETTING, 0x20);													//	Устанавливаем значения компенсации смещения в X=0g, Y=0g, Z=+1g (offset_target_z=«01», offset_target_y=«00», offset_target_x=«00», cut_off=«0»)
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x20);													//	Вычисляем смещение для оси X (cal_trigger=«01» быстрое вычисление компенсации смешения)
-				do{i=objI2C.readByte(BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while (i&0x10==0);						//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x40);													//	Вычисляем смещение для оси Y (cal_trigger=«10» быстрое вычисление компенсации смешения)
-				do{i=objI2C.readByte(BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while (i&0x10==0);						//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
-					objI2C.writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x60);													//	Вычисляем смещение для оси Z (cal_trigger=«11» быстрое вычисление компенсации смешения)
-				do{i=objI2C.readByte(BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while (i&0x10==0);						//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
+						uint8_t i;																								//
+						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x80);												//	Сбрасываем все значения регистров компенсаций смещения в 0 (установкой флага offset_reset)
+						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_SETTING, 0x20);												//	Устанавливаем значения компенсации смещения в X=0g, Y=0g, Z=+1g (offset_target_z=«01», offset_target_y=«00», offset_target_x=«00», cut_off=«0»)
+						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x20);												//	Вычисляем смещение для оси X (cal_trigger=«01» быстрое вычисление компенсации смешения)
+				do{ i = selI2C->readByte (BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while (i&0x10==0);				//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
+						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x40);												//	Вычисляем смещение для оси Y (cal_trigger=«10» быстрое вычисление компенсации смешения)
+				do{ i = selI2C->readByte (BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while (i&0x10==0);				//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
+						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x60);												//	Вычисляем смещение для оси Z (cal_trigger=«11» быстрое вычисление компенсации смешения)
+				do{ i = selI2C->readByte (BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while (i&0x10==0);				//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
 		}																														//
 																																//
 //		Функции не используемые акселерометром:																					//
@@ -215,7 +217,7 @@ class iarduino_Position_BMX055_BMA: public iarduino_Position_BMX055_BASE{							
 																																//
 	private:																													//
 	/**	Внутренние переменные **/																								//
-		iarduino_I2C objI2C;																									//	Создаём объект для работы с шиной I2C
+		iarduino_I2C_Select *selI2C;																							//	Создаём указатель на объект работы с шиной I2C.
 		uint8_t	varRanges =		BMA_2G;																							//	Определяем переменную для хранения полного диапазона измерений (какому угловому ускорению соответствует значение где все биты установлены в «1»)
 		uint8_t	varBandwidth =	BMA_16Hz;																						//	Определяем переменную для хранения полосы пропускания фильтрованных данных
 		float	varQuantum =	2.0/2048.0;																						//	Определяем переменную для хранения шага квантования (какому угловому ускорению равно значение «1» из регистра данных на выбранном диапазоне)

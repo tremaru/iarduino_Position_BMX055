@@ -26,9 +26,11 @@ class iarduino_Position_BMX055_NO_FILTER: public iarduino_Position_BMX055_FILTER
 		uint8_t	getFilter(void){return NO_FILTER;}																				//
 };																																//
 																																//
-#include <iarduino_Position_BMX055_Madgwick.h>																					//	Подключаем файл iarduino_Position_BMX055_Madgwick.h        - с фильтром Маджвика
-#include <iarduino_Position_BMX055_Madgwick_No_Mag.h>																			//	Подключаем файл iarduino_Position_BMX055_Madgwick_No_Mag.h - с фильтром Маджвика без данных магнитометра
-#include <iarduino_Position_BMX055_Mahony.h>																					//	Подключаем файл iarduino_Position_BMX055_Mahony.h          - с фильтром Махони
+#include "iarduino_Position_BMX055_Madgwick.h"																					//	Подключаем файл iarduino_Position_BMX055_Madgwick.h        - с фильтром Маджвика
+#include "iarduino_Position_BMX055_Madgwick_No_Mag.h"																			//	Подключаем файл iarduino_Position_BMX055_Madgwick_No_Mag.h - с фильтром Маджвика без данных магнитометра
+#include "iarduino_Position_BMX055_Mahony.h"																					//	Подключаем файл iarduino_Position_BMX055_Mahony.h          - с фильтром Махони
+																																//
+#include "iarduino_RTC_I2C.h"																									//	Подключаем файл iarduino_RTC_I2C.h - для работы с шиной I2C
 																																//
 class iarduino_Position_BMX055_ALL: public iarduino_Position_BMX055_BASE{														//
 	public:																														//
@@ -50,24 +52,24 @@ class iarduino_Position_BMX055_ALL: public iarduino_Position_BMX055_BASE{							
 		}																														//
 																																//
 //		Инициализация датчиков:																									//
-		bool	begin(bool setZero,float*ptrX,float*ptrY,float*ptrZ,float*ptrT,float*ptrQ1,float*ptrQ2,float*ptrQ3,float*ptrQ4){//	Аргументы: setZero - флаг указывающий о необходимости установить текущие показания в 0, указатели на переменные выводимых данных)
-					axisX=ptrX;																									//	Присваиваем указателю axisX адрес из указателя ptrX который ссылается на переменную axisX класса iarduino_Position_BMX055 предназначенную для вывода данных по оси X
-					axisY=ptrY;																									//	Присваиваем указателю axisY адрес из указателя ptrY который ссылается на переменную axisY класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Y
-					axisZ=ptrZ;																									//	Присваиваем указателю axisZ адрес из указателя ptrZ который ссылается на переменную axisZ класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Z
-					temp =ptrT;																									//	Присваиваем указателю temp  адрес из указателя ptrT который ссылается на переменную temp  класса iarduino_Position_BMX055 предназначенную для вывода температуры
-					q1   =ptrQ1;																								//	Присваиваем указателю q1    адрес из указателя ptrQ1 который ссылается на переменную q1   класса iarduino_Position_BMX055 предназначенную для вывода кватерниона
-					q2   =ptrQ2;																								//	Присваиваем указателю q2    адрес из указателя ptrQ2 который ссылается на переменную q2   класса iarduino_Position_BMX055 предназначенную для вывода кватерниона
-					q3   =ptrQ3;																								//	Присваиваем указателю q3    адрес из указателя ptrQ3 который ссылается на переменную q3   класса iarduino_Position_BMX055 предназначенную для вывода кватерниона
-					q4   =ptrQ4;																								//	Присваиваем указателю q4    адрес из указателя ptrQ4 который ссылается на переменную q4   класса iarduino_Position_BMX055 предназначенную для вывода кватерниона
+		bool	begin(iarduino_I2C_Select* ptrI2C, bool setZero, float*ptrX,float*ptrY,float*ptrZ,float*ptrT, float*ptrQ1,float*ptrQ2,float*ptrQ3,float*ptrQ4){ // Аргументы: ptrI2C - указатель на объект работы с шиной I2C, setZero - флаг указывающий о необходимости установить текущие показания в 0, указатели на переменные выводимых данных)
+					axisX  = ptrX;																								//	Присваиваем указателю axisX  адрес из указателя ptrX который ссылается на переменную axisX класса iarduino_Position_BMX055 предназначенную для вывода данных по оси X
+					axisY  = ptrY;																								//	Присваиваем указателю axisY  адрес из указателя ptrY который ссылается на переменную axisY класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Y
+					axisZ  = ptrZ;																								//	Присваиваем указателю axisZ  адрес из указателя ptrZ который ссылается на переменную axisZ класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Z
+					temp   = ptrT;																								//	Присваиваем указателю temp   адрес из указателя ptrT который ссылается на переменную temp  класса iarduino_Position_BMX055 предназначенную для вывода температуры
+					q1     = ptrQ1;																								//	Присваиваем указателю q1     адрес из указателя ptrQ1 который ссылается на переменную q1   класса iarduino_Position_BMX055 предназначенную для вывода кватерниона
+					q2     = ptrQ2;																								//	Присваиваем указателю q2     адрес из указателя ptrQ2 который ссылается на переменную q2   класса iarduino_Position_BMX055 предназначенную для вывода кватерниона
+					q3     = ptrQ3;																								//	Присваиваем указателю q3     адрес из указателя ptrQ3 который ссылается на переменную q3   класса iarduino_Position_BMX055 предназначенную для вывода кватерниона
+					q4     = ptrQ4;																								//	Присваиваем указателю q4     адрес из указателя ptrQ4 который ссылается на переменную q4   класса iarduino_Position_BMX055 предназначенную для вывода кватерниона
 					bool i;																										//	Объявляем переменную для хранения результатов возвращаемых функциями begin объектов датчиков
 					#ifndef BMX055_DISABLE_BMA																					//	Если используется акселерометр
-					i = objBMA -> begin(setZero,&BMAx,&BMAy,&BMAz,&BMAt,&q0,&q0,&q0,&q0);	if(!i){return i;}					//	Вызываем функцию инициализации акселерометра, указывая флаг необходимости установки осей в 0 и ссылки на переменные в которые требуется возвращать полученные результаты
+					i = objBMA -> begin(ptrI2C, setZero, &BMAx,&BMAy,&BMAz,&BMAt, &q0,&q0,&q0,&q0);	if(!i){return i;}			//	Вызываем функцию инициализации акселерометра, указывая объект шины I2C, флаг необходимости установки осей в 0 и ссылки на переменные в которые требуется возвращать полученные результаты
 					#endif																										//
 					#ifndef BMX055_DISABLE_BMG																					//	Если используется гироскоп
-					i = objBMG -> begin(setZero,&BMGx,&BMGy,&BMGz,&BMGt,&q0,&q0,&q0,&q0);	if(!i){return i;}					//	Вызываем функцию инициализации гироскопа,     указывая флаг необходимости установки осей в 0 и ссылки на переменные в которые требуется возвращать полученные результаты
+					i = objBMG -> begin(ptrI2C, setZero, &BMGx,&BMGy,&BMGz,&BMGt, &q0,&q0,&q0,&q0);	if(!i){return i;}			//	Вызываем функцию инициализации гироскопа,     указывая объект шины I2C, флаг необходимости установки осей в 0 и ссылки на переменные в которые требуется возвращать полученные результаты
 					#endif																										//
 					#ifndef BMX055_DISABLE_BMM																					//	Если используется магнитометр
-					i = objBMM -> begin(false  ,&BMMx,&BMMy,&BMMz,&BMMt,&q0,&q0,&q0,&q0);	if(!i){return i;}					//	Вызываем функцию инициализации магнитометра,  флаг setZero сброшен, далее указываем ссылки на переменные в которые требуется возвращать полученные результаты
+					i = objBMM -> begin(ptrI2C, false  , &BMMx,&BMMy,&BMMz,&BMMt, &q0,&q0,&q0,&q0);	if(!i){return i;}			//	Вызываем функцию инициализации магнитометра,  указывая объект шины I2C, флаг setZero сброшен, далее указываем ссылки на переменные в которые требуется возвращать полученные результаты
 					#endif																										//
 					return true;																								//
 		}																														//
