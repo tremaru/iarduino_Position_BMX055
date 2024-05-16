@@ -61,7 +61,7 @@
 #define REG_BMM_DIG_XY2			0x70		//	Значения корректировки					|											dig_xy2<7:0>										| конст	|	dig_xy2<7:0>   - значение устанавливается на заводе изготовителе
 #define REG_BMM_DIG_XY1			0x71		//	Значения корректировки					|											dig_xy1<7:0>										| конст	|	dig_xy1<7:0>   - значение устанавливается на заводе изготовителе
 
-#include "iarduino_RTC_I2C.h"																									//	Подключаем файл iarduino_RTC_I2C.h - для работы с шиной I2C
+#include "iarduino_Position_BMX055_I2C.h"																						//	Подключаем файл iarduino_Position_BMX055_I2C.h - для работы с шиной I2C
 																																//
 class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{														//
 	public:																														//

@@ -1,5 +1,5 @@
 //	Библиотека для работы с Trema модулем IMU 9 DOF на базе чипа BMX055. http://iarduino.ru/shop/Expansion-payments/imu-sensor-na-9-stepeney-svobody-trema-modul-v2-0.html
-//  Версия: 1.2.1
+//  Версия: 1.2.2
 //  Последнюю версию библиотеки Вы можете скачать по ссылке: http://iarduino.ru/file/337.html
 //  Подробное описание функции бибилиотеки доступно по ссылке: http://wiki.iarduino.ru/page/Trema_IMU9/
 //  Библиотека является собственностью интернет магазина iarduino.ru и может свободно использоваться и распространяться!
@@ -18,7 +18,7 @@
 #endif																									//
 																										//
 #include	"memorysaver.h"																				//	Подключаем файл «хранитель памяти»									(внутри файла есть комментарий поясняющий как сэкономить мапять)
-#include	"iarduino_I2C_Expander_I2C.h"																//	Подключаем библиотеку выбора реализации шины I2C.
+#include	"iarduino_Position_BMX055_I2C.h"															//	Подключаем библиотеку выбора реализации шины I2C.
 																										//
 #if defined(TwoWire_h) || defined(__ARDUINO_WIRE_IMPLEMENTATION__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega2560__) || defined(ESP8266) || defined(ESP32) || defined(ARDUINO_ARCH_RP2040) || defined(RENESAS_CORTEX_M4) // Если подключена библиотека Wire или платы её поддерживают...
 #include	<Wire.h>																					//	Разрешаем использовать библиотеку Wire в данной библиотеке.

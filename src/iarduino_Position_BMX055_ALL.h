@@ -30,7 +30,7 @@ class iarduino_Position_BMX055_NO_FILTER: public iarduino_Position_BMX055_FILTER
 #include "iarduino_Position_BMX055_Madgwick_No_Mag.h"																			//	Подключаем файл iarduino_Position_BMX055_Madgwick_No_Mag.h - с фильтром Маджвика без данных магнитометра
 #include "iarduino_Position_BMX055_Mahony.h"																					//	Подключаем файл iarduino_Position_BMX055_Mahony.h          - с фильтром Махони
 																																//
-#include "iarduino_RTC_I2C.h"																									//	Подключаем файл iarduino_RTC_I2C.h - для работы с шиной I2C
+#include "iarduino_Position_BMX055_I2C.h"																						//	Подключаем файл iarduino_Position_BMX055_I2C.h - для работы с шиной I2C
 																																//
 class iarduino_Position_BMX055_ALL: public iarduino_Position_BMX055_BASE{														//
 	public:																														//
