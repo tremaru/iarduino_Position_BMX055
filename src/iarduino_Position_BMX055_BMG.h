@@ -88,9 +88,15 @@ class iarduino_Position_BMX055_BMG: public iarduino_Position_BMX055_BASE{							
 					axisZ  = ptrZ;																								//	Присваиваем указателю axisZ адрес из указателя ptrZ который ссылается на переменную axisZ класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Z
 					temp   = ptrT;																								//	Присваиваем указателю temp  адрес из указателя ptrT который ссылается на переменную temp  класса iarduino_Position_BMX055 предназначенную для вывода температуры
 					if( selI2C->readByte(BMG_ADDRES, REG_BMG_CHIPID) != BMG_ID ){ return false; }								//	Возвращаем ошибку если содержимое регистра REG_BMG_CHIPID не совпало с реальным ID чипа указанным в константе BMG_ID
+				//	Перезагружаем датчик:																						//
 					selI2C->writeByte(BMG_ADDRES, REG_BMG_RESET, 0xB6);															//	Выполняем программную перезагрузку (записываем значение 0xB6 в регистр REG_BMG_RESET)
-					delay(100);																									//	Ждём сброса регистров
-					selI2C->writeByte(BMG_ADDRES, REG_BMG_LPM1, 0x00);															//	Переводим гироскоп в нормальный режим питания (сбрасываем флаги suspend и deep_suspend)
+					delay(100);																									//	Ждём сброса регистров. Модуль мог не ответить ACK на предыдущую команду перезагрузки, значит мог вызвать timeout библиотеки I2C.
+				//	Включаем датчик:																							//
+					if(!selI2C->writeByte(BMG_ADDRES, REG_BMG_LPM1, 0x00) ){													//	Переводим гироскоп в нормальный режим питания (сбрасываем флаги suspend и deep_suspend)
+						selI2C->begin();																						//	Переинициируем работу с шиной I2C, т.к. библиотека I2C могла находиться в timeout.
+						selI2C->writeByte(BMG_ADDRES, REG_BMG_LPM1, 0x00);														//	Переводим гироскоп в нормальный режим питания (сбрасываем флаги suspend и deep_suspend)
+					}																											//
+				//	Настраиваем датчик:																							//
 					setScale(varRanges);																						//	Устанавливаем диапазон измерений гироскопа (указывая предел измеряемой угловой скорости)
 					setBandwidths(varBandwidth);																				//	Устанавливаем пропускную способность гироскопа (указывая частоту обновления фильтрованных данных)
 					selI2C->writeByte(BMG_ADDRES, REG_BMG_D_HBW, 0x00);															//	Указываем гироскопу, что требуется выводить отфильтрованные данные (dataHigh_bw=0) с механизмом их затенения во время чтения (shadow_dis=0). Затенение осначает что значение регистров данных не будет изменяться от начала и до конца пакетного чтения
@@ -103,7 +109,7 @@ class iarduino_Position_BMX055_BMG: public iarduino_Position_BMX055_BASE{							
 					if( selI2C->readByte(BMG_ADDRES, REG_BMG_CHIPID) != BMG_ID ){ return BMG_ERR_ID; }							//	Возвращаем ошибку если содержимое регистра REG_BMG_CHIPID не совпало с реальным ID чипа указанным в константе BMG_ID
 					uint8_t	i;																									//	Объявляем переменную для чтения результата самотестирования
 					selI2C->writeByte(BMG_ADDRES, REG_BMG_BI_SELF_TEST, 0x01); 													//	Выполняем самотестирование BIST (Built-In Self Test) установив последний бит trig_bist регистра REG_BMG_BI_SELF_TEST
-			do{ i = selI2C->readByte (BMA_ADDRES, REG_BMG_BI_SELF_TEST); delay(10); } while (i&0x02);							//	Ждём установки бита bist_rdy регистра REG_BMG_BI_SELF_TEST
+			do{ i = selI2C->readByte (BMG_ADDRES, REG_BMG_BI_SELF_TEST); delay(10); } while (i&0x02);							//	Ждём установки бита bist_rdy регистра REG_BMG_BI_SELF_TEST
 					if( i&0x04 ){ return BMG_ERR_ST; }																			//	Если установлен бит bist_fail регистра REG_BMG_BI_SELF_TEST значит тест не пройден, возвращаем BMG_ERR_ST
 					return 0;																									//	Выводим результат успешного самотестирования
 		}																														//
@@ -118,9 +124,9 @@ class iarduino_Position_BMX055_BMG: public iarduino_Position_BMX055_BASE{							
 						case BMG_DEG_S:	j=1.0f;			break;																	//	Если данные требуется возвращать в °/c
 						case BMG_RAD_S:	j=PI/180.0f;	break;																	//	Если данные требуется возвращать в рад/c
 					}																											//
-					*axisX = float((int16_t(i[1])<<8) | i[0]) * varQuantum * j;													//	Получаем результирующее 16-битное значение из частей MSB (i[1]), LSB (i[0]), умножаем его на шаг квантования varQuantum и преобразуем в требуемую величину измерений
-					*axisY = float((int16_t(i[3])<<8) | i[2]) * varQuantum * j;													//	Получаем результирующее 16-битное значение из частей MSB (i[3]), LSB (i[2]), умножаем его на шаг квантования varQuantum и преобразуем в требуемую величину измерений
-					*axisZ = float((int16_t(i[5])<<8) | i[4]) * varQuantum * j;													//	Получаем результирующее 16-битное значение из частей MSB (i[5]), LSB (i[4]), умножаем его на шаг квантования varQuantum и преобразуем в требуемую величину измерений
+					*axisX = (float)((int16_t)( ((uint16_t)i[1]<<8 ) | (uint16_t)i[0] )) * varQuantum * j;						//	Получаем результирующее 16-битное значение из частей MSB (i[1]), LSB (i[0]), умножаем его на шаг квантования varQuantum и преобразуем в требуемую величину измерений
+					*axisY = (float)((int16_t)( ((uint16_t)i[3]<<8 ) | (uint16_t)i[2] )) * varQuantum * j;						//	Получаем результирующее 16-битное значение из частей MSB (i[3]), LSB (i[2]), умножаем его на шаг квантования varQuantum и преобразуем в требуемую величину измерений
+					*axisZ = (float)((int16_t)( ((uint16_t)i[5]<<8 ) | (uint16_t)i[4] )) * varQuantum * j;						//	Получаем результирующее 16-битное значение из частей MSB (i[5]), LSB (i[4]), умножаем его на шаг квантования varQuantum и преобразуем в требуемую величину измерений
 					*temp  = 0;																									//  У гироскопа нет регистров для хранения данных температуры, возвращаем 0°С.
 					return true;																								//
 		}																														//
@@ -160,8 +166,8 @@ class iarduino_Position_BMX055_BMG: public iarduino_Position_BMX055_BASE{							
 																																//
 //		Выполнение быстрой компенсации смещения данных:																			//
 		void	setFastOffset(uint8_t offset){																					//	Аргумент: не имеет значения.
-					      selI2C->writeByte(BMG_ADDRES, REG_BMG_AOFS_FOFS,   0xFF);												//	Выполняем быструю компенсацию смещения для всех осей установив все биты регистра REG_BMG_AOFS_FOFS в «1»: autoOffsetWordLen<1:0>=«11» - 256 выборок для автоматической компенсации смещения (были установлены по умолчанию), fastOffsetWordLen<1:0>=«11» - 256 выборок для быстрой компенсации смещения, FOffsetEn=«1» - запускаем быструю компенсацию смещения для всех осей, так как флаги FOffsetEn_z, FOffsetEn_y и FOffsetEn_x тоже установлены в «1».
-					while(selI2C->readByte (BMG_ADDRES, REG_BMG_AOFS_FOFS)&0x08==0){};											//	Ждём завершения быстрой компенсации смещения (ждём пока сбросится флаг FOffsetEn)
+					       selI2C->writeByte(BMG_ADDRES, REG_BMG_AOFS_FOFS,0xFF);												//	Выполняем быструю компенсацию смещения для всех осей установив все биты регистра REG_BMG_AOFS_FOFS в «1»: autoOffsetWordLen<1:0>=«11» - 256 выборок для автоматической компенсации смещения (были установлены по умолчанию), fastOffsetWordLen<1:0>=«11» - 256 выборок для быстрой компенсации смещения, FOffsetEn=«1» - запускаем быструю компенсацию смещения для всех осей, так как флаги FOffsetEn_z, FOffsetEn_y и FOffsetEn_x тоже установлены в «1».
+					while( selI2C->readByte (BMG_ADDRES, REG_BMG_AOFS_FOFS     )&0x08==0){;}									//	Ждём завершения быстрой компенсации смещения (ждём пока сбросится флаг FOffsetEn)
 		}																														//
 																																//
 //		Функции не используемые гироскопом:																						//

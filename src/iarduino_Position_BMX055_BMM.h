@@ -241,12 +241,12 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 //		Чтение показаний АЦП магнитометра с корректировкой прочитанных значений:												//
 		bool	readADC(void){																									//	Аргумент: отсутствует
 					uint8_t i[8]; if( !selI2C->readBytes(BMM_ADDRES, REG_BMM_X_LSB, i, 8) ){ return false; }					//	Читаем 8 байт регистров АЦП начиная с регистра REG_BMM_X_LSB в объявленный массив i
-					uint16_t j = ((uint16_t(i[7])<<8) | i[6]) >> 2;																//	Получаем сопростивление по которому будет рассчитана температура
+					uint16_t j = ( ((uint16_t)i[7]<<8) | (uint16_t)i[6] )>>2;													//	Получаем сопростивление по которому будет рассчитана температура
 					if(i[6] & 0x01 == 0){return false;}																			//	Если не установлен бит data_ready регистра REG_BMM_TEMP_LSB, значит данные не новые
-			/* T */	mag_adc[3] = int16_t(uint16_t((int32_t(dig_xyz1)<<14)/(j != 0 ? j : dig_xyz1))-uint16_t(0x4000));			//	Рассчитываем температуру по полученному сопротивлению
-			/* X */ mag_adc[0] = int16_t((int32_t (((int16_t(i[1])<<8)|i[0])>>3)*((((((int32_t(dig_xy2)*((int32_t(mag_adc[3])*int32_t(mag_adc[3]))>>7))+(int32_t(mag_adc[3])*int32_t(int16_t(dig_xy1)<<7)))>>9)+int32_t(0x100000))*int32_t(int16_t(dig_x2)+int16_t(0xA0)))>>12))>>13)+(int16_t(dig_x1)<<3);	// Получаем значение АЦП для оси X и корректируем его
-			/* Y */ mag_adc[1] = int16_t((int32_t (((int16_t(i[3])<<8)|i[2])>>3)*((((((int32_t(dig_xy2)*((int32_t(mag_adc[3])*int32_t(mag_adc[3]))>>7))+(int32_t(mag_adc[3])*int32_t(int16_t(dig_xy1)<<7)))>>9)+int32_t(0x100000))*int32_t(int16_t(dig_y2)+int16_t(0xA0)))>>12))>>13)+(int16_t(dig_y1)<<3);	// Получаем значение АЦП для оси Y и корректируем его
-			/* Z */ mag_adc[2] =        ((int32_t((((int16_t(i[5])<<8)|i[4])>>1)-dig_z4)<<15)-((int32_t(dig_z3)*int32_t(int16_t(j)-int16_t(dig_xyz1)))>>2))/(dig_z2+int16_t(((int32_t(dig_z1)*(int16_t(j)<<1))+(1<<15))>>16));																				// Получаем значение АЦП для оси Z и корректируем его
+			/* T */ mag_adc[3] = (int16_t)(((int32_t)dig_xyz1<<14)/(int32_t)(j!=0? j:dig_xyz1))-(int16_t)0x4000;				//	Рассчитываем температуру по полученному сопротивлению
+			/* X */ mag_adc[0] = (int16_t)(dig_x1<<3)+(int16_t)(((int32_t)((int16_t)(((uint16_t)i[1]<<8)|(uint16_t)i[0])>>3)*((((((int32_t)dig_xy2*(((int32_t)mag_adc[3]*(int32_t)mag_adc[3])>>7)+(int32_t)mag_adc[3]*(int32_t)((int16_t)dig_xy1<<7))>>9)+(int32_t)0x100000)*(int32_t)((int16_t)dig_x2+(int16_t)0xA0))>>12))>>13);	// Получаем значение АЦП для оси X и корректируем его
+			/* Y */ mag_adc[1] = (int16_t)(dig_y1<<3)+(int16_t)(((int32_t)((int16_t)(((uint16_t)i[3]<<8)|(uint16_t)i[2])>>3)*((((((int32_t)dig_xy2*(((int32_t)mag_adc[3]*(int32_t)mag_adc[3])>>7)+(int32_t)mag_adc[3]*(int32_t)((int16_t)dig_xy1<<7))>>9)+(int32_t)0x100000)*(int32_t)((int16_t)dig_y2+(int16_t)0xA0))>>12))>>13);	// Получаем значение АЦП для оси Y и корректируем его
+			/* Z */ mag_adc[2] = (int16_t)((((int32_t)(((int16_t)(((uint16_t)i[5]<<8)|(uint16_t)i[4])>>1)-dig_z4)<<15)-(((int32_t)dig_z3*(int32_t)((int16_t)j-(int16_t)dig_xyz1))>>2))/(int32_t)(dig_z2+(int16_t)((((int32_t)dig_z1*(int32_t)((int16_t)j<<1))+(1<<15))>>16)));														// Получаем значение АЦП для оси Z и корректируем его
 					return true;																								//
 		}																														//
 																																//
