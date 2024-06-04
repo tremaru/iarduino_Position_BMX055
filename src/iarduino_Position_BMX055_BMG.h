@@ -93,7 +93,7 @@ class iarduino_Position_BMX055_BMG: public iarduino_Position_BMX055_BASE{							
 					delay(100);																									//	Ждём сброса регистров. Модуль мог не ответить ACK на предыдущую команду перезагрузки, значит мог вызвать timeout библиотеки I2C.
 				//	Включаем датчик:																							//
 					if(!selI2C->writeByte(BMG_ADDRES, REG_BMG_LPM1, 0x00) ){													//	Переводим гироскоп в нормальный режим питания (сбрасываем флаги suspend и deep_suspend)
-						selI2C->begin();																						//	Переинициируем работу с шиной I2C, т.к. библиотека I2C могла находиться в timeout.
+						selI2C->begin();																						//	Повторно инициируем работу с шиной I2C, т.к. библиотека I2C могла находиться в timeout.
 						selI2C->writeByte(BMG_ADDRES, REG_BMG_LPM1, 0x00);														//	Переводим гироскоп в нормальный режим питания (сбрасываем флаги suspend и deep_suspend)
 					}																											//
 				//	Настраиваем датчик:																							//

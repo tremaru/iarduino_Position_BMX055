@@ -1,5 +1,5 @@
 //	Библиотека для работы с Trema модулем IMU 9 DOF на базе чипа BMX055. http://iarduino.ru/shop/Expansion-payments/imu-sensor-na-9-stepeney-svobody-trema-modul-v2-0.html
-//  Версия: 1.2.3
+//  Версия: 1.2.4
 //  Последнюю версию библиотеки Вы можете скачать по ссылке: http://iarduino.ru/file/337.html
 //  Подробное описание функции бибилиотеки доступно по ссылке: http://wiki.iarduino.ru/page/Trema_IMU9/
 //  Библиотека является собственностью интернет магазина iarduino.ru и может свободно использоваться и распространяться!
@@ -65,19 +65,19 @@ class iarduino_Position_BMX055{																			//
 		}																								//
 	/**	Пользовательские функции **/																	//
 		#if defined(TwoWire_h) || defined(__ARDUINO_WIRE_IMPLEMENTATION__)								//	Если подключена библиотека Wire.h
-		bool	begin			(TwoWire* i=&Wire, bool setZero=false	){ selI2C->begin(i); return objClass->begin			((iarduino_I2C_Select*)selI2C, setZero, &axisX,&axisY,&axisZ,&temp, &q1,&q2,&q3,&q4);	}	//	Определяем функцию инициализации модуля (Параметр: [объект для работы с аппаратной шиной I2C],[флаг указывающий о необходимости установить текущие показания датчика в 0]).
+		bool	begin			(TwoWire* i=&Wire, bool setZero=false	){ selI2C->init(i); selI2C->begin();	return	objClass->begin			((iarduino_I2C_Select*)selI2C, setZero, &axisX,&axisY,&axisZ,&temp, &q1,&q2,&q3,&q4);	}	//	Определяем функцию инициализации модуля (Параметр: [объект для работы с аппаратной шиной I2C],[флаг указывающий о необходимости установить текущие показания датчика в 0]).
 		#endif																							//
 		#if defined(iarduino_I2C_Software_h)															//	Если подключена библиотека iarduino_I2C_Software.h
-		bool	begin			(SoftTwoWire* i  , bool setZero=false	){ selI2C->begin(i); return objClass->begin			((iarduino_I2C_Select*)selI2C, setZero, &axisX,&axisY,&axisZ,&temp, &q1,&q2,&q3,&q4);	}	//	Определяем функцию инициализации модуля (Параметр: объект для работы с программной шиной I2C ,[флаг указывающий о необходимости установить текущие показания датчика в 0]).
+		bool	begin			(SoftTwoWire* i  , bool setZero=false	){ selI2C->init(i); selI2C->begin();	return	objClass->begin			((iarduino_I2C_Select*)selI2C, setZero, &axisX,&axisY,&axisZ,&temp, &q1,&q2,&q3,&q4);	}	//	Определяем функцию инициализации модуля (Параметр: объект для работы с программной шиной I2C ,[флаг указывающий о необходимости установить текущие показания датчика в 0]).
 		#endif																							//
-		uint8_t	test			(void									){                   return objClass->test			();																						}	//	Определяем функцию тестирования  датчика(ов) модуля					(аргумент: отсутствует)
-		bool	read			(uint8_t thisMera = 0					){                   return objClass->read			(thisMera);																				}	//	Определяем функцию чтения данных датчика(ов) модуля					(аргумент: thisMera - мера измерения читаемых данных)
-		void	setScale		(uint8_t scale							){                          objClass->setScale		(scale);																				}	//	Определяем функцию установки диапазона измерений					(аргумент: scale - диапазон измерений)
-		void	setBandwidths	(uint8_t bandwidths						){                          objClass->setBandwidths	(bandwidths);																			}	//	Определяем функцию установки полосы пропускания для фильтр. данных	(аргумент: bandwidths - полоса пропускания для фильтрованных данных)
-		void	setFastOffset	(uint8_t offset = 0						){                          objClass->setFastOffset	(offset);																				}	//	Определяем функцию выполнения быстрой компенсации смещения данных	(аргумент: offset - имеет значение только для магнитометра)
-		void	setFastOffset	(float*  offset							){                          objClass->setFastOffset	(offset);																				}	//	Определяем функцию установки массива компенсации для магнитометра	(аргумент: offset - имеет значение только для магнитометра)
-		void	getFastOffset	(float*  offset							){                          objClass->getFastOffset	(offset);																				}	//	Определяем функцию получения массива компенсации для магнитометра	(аргумент: offset - имеет значение только для магнитометра)
-		uint8_t	getFilter		(void									){                   return objClass->getFilter		();																						}	//	Определяем функцию возвращающую тип используемого фильтра			(аргумент: отсутствует)
+		uint8_t	test			(void									){										return	objClass->test			();																						}	//	Определяем функцию тестирования  датчика(ов) модуля					(аргумент: отсутствует)
+		bool	read			(uint8_t thisMera = 0					){										return	objClass->read			(thisMera);																				}	//	Определяем функцию чтения данных датчика(ов) модуля					(аргумент: thisMera - мера измерения читаемых данных)
+		void	setScale		(uint8_t scale							){												objClass->setScale		(scale);																				}	//	Определяем функцию установки диапазона измерений					(аргумент: scale - диапазон измерений)
+		void	setBandwidths	(uint8_t bandwidths						){												objClass->setBandwidths	(bandwidths);																			}	//	Определяем функцию установки полосы пропускания для фильтр. данных	(аргумент: bandwidths - полоса пропускания для фильтрованных данных)
+		void	setFastOffset	(uint8_t offset = 0						){												objClass->setFastOffset	(offset);																				}	//	Определяем функцию выполнения быстрой компенсации смещения данных	(аргумент: offset - имеет значение только для магнитометра)
+		void	setFastOffset	(float*  offset							){												objClass->setFastOffset	(offset);																				}	//	Определяем функцию установки массива компенсации для магнитометра	(аргумент: offset - имеет значение только для магнитометра)
+		void	getFastOffset	(float*  offset							){												objClass->getFastOffset	(offset);																				}	//	Определяем функцию получения массива компенсации для магнитометра	(аргумент: offset - имеет значение только для магнитометра)
+		uint8_t	getFilter		(void									){										return	objClass->getFilter		();																						}	//	Определяем функцию возвращающую тип используемого фильтра			(аргумент: отсутствует)
 	/**	Пользовательские переменные **/																	//
 		float	axisX =			0;																		//	Определяем переменную для вывода данных по оси X
 		float	axisY =			0;																		//	Определяем переменную для вывода данных по оси Y
