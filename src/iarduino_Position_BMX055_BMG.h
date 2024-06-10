@@ -167,7 +167,7 @@ class iarduino_Position_BMX055_BMG: public iarduino_Position_BMX055_BASE{							
 //		Выполнение быстрой компенсации смещения данных:																			//
 		void	setFastOffset(uint8_t offset){																					//	Аргумент: не имеет значения.
 					       selI2C->writeByte(BMG_ADDRES, REG_BMG_AOFS_FOFS,0xFF);												//	Выполняем быструю компенсацию смещения для всех осей установив все биты регистра REG_BMG_AOFS_FOFS в «1»: autoOffsetWordLen<1:0>=«11» - 256 выборок для автоматической компенсации смещения (были установлены по умолчанию), fastOffsetWordLen<1:0>=«11» - 256 выборок для быстрой компенсации смещения, FOffsetEn=«1» - запускаем быструю компенсацию смещения для всех осей, так как флаги FOffsetEn_z, FOffsetEn_y и FOffsetEn_x тоже установлены в «1».
-					while( selI2C->readByte (BMG_ADDRES, REG_BMG_AOFS_FOFS     )&0x08==0){;}									//	Ждём завершения быстрой компенсации смещения (ждём пока сбросится флаг FOffsetEn)
+					while( (selI2C->readByte (BMG_ADDRES, REG_BMG_AOFS_FOFS     )&0x08)!=0){;}									//	Ждём завершения быстрой компенсации смещения (ждём пока сбросится флаг FOffsetEn)
 		}																														//
 																																//
 //		Функции не используемые гироскопом:																						//
