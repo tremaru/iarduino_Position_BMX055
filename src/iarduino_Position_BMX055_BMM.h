@@ -209,7 +209,7 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 					if( offset==BMM_RESET ){																					//
 						magBias[0]=     0; magBias[1]=     0; magBias[2]=     0;												//
 						mag_max[0]=-32768; mag_max[1]=-32768; mag_max[2]=-32768;												//
-						mag_min[0]= 32768; mag_min[1]= 32768; mag_min[2]= 32768;												//
+						mag_min[0]= 32767; mag_min[1]= 32767; mag_min[2]= 32767;												//
 					}																											//
 		}																														//
 																																//
