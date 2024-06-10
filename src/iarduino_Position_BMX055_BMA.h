@@ -155,9 +155,12 @@ class iarduino_Position_BMX055_BMA: public iarduino_Position_BMX055_BASE{							
 							case		BMA_G:													break;							//	Если данные требуется возвращать в g (количестве ускорений свободного падения), то они уже готовы.
 							case		BMA_RAD:																				//	Если данные требуется возвращать в радианах
 							case		BMA_DEG:																				//	Если данные требуется возвращать в градусах
-										*axisX=atan(*axisX/sqrt(sq(*axisY)+sq(*axisZ)));										//	Угол в радианах для оси X = arctan( gX / √( gY² + gZ²) )
-										*axisY=atan(*axisY/sqrt(sq(*axisZ)+sq(*axisX)));										//	Угол в радианах для оси Y = arctan( gY / √( gZ² + gX²) )
-										*axisZ=atan(*axisZ/sqrt(sq(*axisX)+sq(*axisY)));										//	Угол в радианах для оси Z = arctan( gZ / √( gX² + gY²) )
+										float gX=*axisX;																		//	Сохраняем координаты для использования в расчетах - переменные *axis* будут перезаписаны углами
+										float gY=*axisY;
+										float gZ=*axisZ;
+										*axisX=atan(gX/sqrt(sq(gY)+sq(gZ)));													//	Угол в радианах для оси X = arctan( gX / √( gY² + gZ²) )
+										*axisY=atan(gY/sqrt(sq(gZ)+sq(gX)));													//	Угол в радианах для оси Y = arctan( gY / √( gZ² + gX²) )
+										*axisZ=atan(gZ/sqrt(sq(gX)+sq(gY)));													//	Угол в радианах для оси Z = arctan( gZ / √( gX² + gY²) )
 										if( thisMera==BMA_DEG ){ *axisX*=180/PI; *axisY*=180/PI; *axisZ*=180/PI; }	break;		//	Преобразуем угол из радиан в градусы.
 						}																										//
 						return true;																							//
