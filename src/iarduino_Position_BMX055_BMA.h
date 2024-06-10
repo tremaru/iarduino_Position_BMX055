@@ -94,6 +94,10 @@ class iarduino_Position_BMX055_BMA: public iarduino_Position_BMX055_BASE{							
 	/**	функции доступные пользователю **/																						//
 //		Инициализация датчика:																									//
 		bool	begin(iarduino_I2C_Select* ptrI2C, bool setZero, float*ptrX,float*ptrY,float*ptrZ,float*ptrT, float*ptrQ1,float*ptrQ2,float*ptrQ3,float*ptrQ4){ // Аргументы: ptrI2C - указатель на объект работы с шиной I2C, setZero - флаг указывающий о необходимости установить текущие показания в 0, указатели на переменные выводимых данных)
+					(void)ptrQ1;
+					(void)ptrQ2;
+					(void)ptrQ3;
+					(void)ptrQ4;
 					selI2C = ptrI2C;																							//	Присваиваем указателю selI2C адрес из указателя ptrI2C
 					axisX  = ptrX;																								//	Присваиваем указателю axisX  адрес из указателя ptrX который ссылается на переменную axisX класса iarduino_Position_BMX055 предназначенную для вывода данных по оси X
 					axisY  = ptrY;																								//	Присваиваем указателю axisY  адрес из указателя ptrY который ссылается на переменную axisY класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Y
@@ -202,6 +206,7 @@ class iarduino_Position_BMX055_BMA: public iarduino_Position_BMX055_BASE{							
 																																//
 //		Выполнение быстрой компенсации смещения данных:																			//
 		void	setFastOffset(uint8_t offset){																					//	Аргумент: не имеет значения.
+						(void)offset;
 						uint8_t i;																								//
 						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x80);												//	Сбрасываем все значения регистров компенсаций смещения в 0 (установкой флага offset_reset)
 						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_SETTING, 0x20);												//	Устанавливаем значения компенсации смещения в X=0g, Y=0g, Z=+1g (offset_target_z=«01», offset_target_y=«00», offset_target_x=«00», cut_off=«0»)
@@ -214,8 +219,8 @@ class iarduino_Position_BMX055_BMA: public iarduino_Position_BMX055_BASE{							
 		}																														//
 																																//
 //		Функции не используемые акселерометром:																					//
-		void	setFastOffset (float* offset){;}																				//	Установка массива компенсации смещения данных используется только для объекта BMM, но функцию объявить нужно, так как данный класс является производным и должен содержать все функции полиморфного класса
-		void	getFastOffset (float* offset){;}																				//	Получение массива компенсации смещения данных используется только для объекта BMM, но функцию объявить нужно, так как данный класс является производным и должен содержать все функции полиморфного класса
+		void	setFastOffset (float* offset){(void)offset;}																				//	Установка массива компенсации смещения данных используется только для объекта BMM, но функцию объявить нужно, так как данный класс является производным и должен содержать все функции полиморфного класса
+		void	getFastOffset (float* offset){(void)offset;}																				//	Получение массива компенсации смещения данных используется только для объекта BMM, но функцию объявить нужно, так как данный класс является производным и должен содержать все функции полиморфного класса
 		uint8_t	getFilter     (void         ){return 0;}																		//	Фильтр используется только для объекта BMX, но функцию объявить нужно, так как данный класс является производным и должен содержать все функции полиморфного класса
 																																//
 	private:																													//

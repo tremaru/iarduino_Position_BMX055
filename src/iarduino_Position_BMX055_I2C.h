@@ -167,7 +167,7 @@ class iarduino_I2C_Select: public iarduino_I2C_VirtualSelect{													//
 		uint8_t getPinSDA(void){																				//
 			int scl=0, sda=0;																					//
 			#if defined(I2C_HW_includes)																		//
-				if(flgI2CType==1){ sda=SDA; }																	//
+				if(flgI2CType==1){ sda=SDA; (void)scl; }																	//
 			#endif																								//
 			#if defined(I2C_SW_includes)																		//
 				if(flgI2CType==2){ (*(SoftTwoWire*)objI2C).getPins(&sda, &scl); }								//
@@ -179,7 +179,7 @@ class iarduino_I2C_Select: public iarduino_I2C_VirtualSelect{													//
 		uint8_t getPinSCL(void){																				//
 			int scl=0, sda=0;																					//
 			#if defined(I2C_HW_includes)																		//
-				if(flgI2CType==1){ scl=SCL; }																	//
+				if(flgI2CType==1){ scl=SCL; (void)sda; }																	//
 			#endif																								//
 			#if defined(I2C_SW_includes)																		//
 				if(flgI2CType==2){ (*(SoftTwoWire*)objI2C).getPins(&sda, &scl); }								//
@@ -191,6 +191,8 @@ class iarduino_I2C_Select: public iarduino_I2C_VirtualSelect{													//
 		void setWireTimeout(uint32_t timeout){	//	Если timeout=0 мкс, то таймаут отключён.					//
 			#if defined(I2C_SW_includes)																		//
 				if(flgI2CType==2){ (*(SoftTwoWire*)objI2C).setWireTimeout(timeout); }							//
+                        #else
+				(void)timeout;
 			#endif																								//
 		}																										//
 		void setWireTimeout(void){	//	использовать время таймаута по умолчанию.								//

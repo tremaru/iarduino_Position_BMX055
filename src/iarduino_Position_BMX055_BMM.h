@@ -68,6 +68,11 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 	/**	функции доступные пользователю **/																						//
 //		Инициализация датчика:																									//
 		bool	begin(iarduino_I2C_Select* ptrI2C, bool setZero, float*ptrX,float*ptrY,float*ptrZ,float*ptrT, float*ptrQ1,float*ptrQ2,float*ptrQ3,float*ptrQ4 ){ // Аргументы: ptrI2C - указатель на объект работы с шиной I2C, setZero - неиспользуемый флаг, указатели на переменные выводимых данных)
+					(void)setZero;
+					(void)ptrQ1;
+					(void)ptrQ2;
+					(void)ptrQ3;
+					(void)ptrQ4;
 					selI2C    = ptrI2C;																							//	Присваиваем указателю selI2C адрес из указателя ptrI2C
 					axisX     = ptrX;																							//	Присваиваем указателю axisX  адрес из указателя ptrX который ссылается на переменную axisX класса iarduino_Position_BMX055 предназначенную для вывода данных по оси X
 					axisY     = ptrY;																							//	Присваиваем указателю axisY  адрес из указателя ptrY который ссылается на переменную axisY класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Y
@@ -118,10 +123,10 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 							selI2C->writeByte(BMM_ADDRES, REG_BMM_CTRL_1, i|0x06);												//	Переходим в спящий режим (сохраняем значение переменной i обратно в регистр REG_BMM_CTRL_1 предварительно установив биты op_mode<1:0>
 					j = 	selI2C->readByte (BMM_ADDRES, REG_BMM_INT_EN_1);													//	Читаем значение регистра REG_BMM_INT_EN_1 в переменную j
 							selI2C->writeByte(BMM_ADDRES, REG_BMM_INT_EN_1, j|0x18);											//	Отключаем каналы осей X и Y (сохраняем значение переменной j обратно в регистр REG_BMM_INT_EN_1 предварительно установив биты channel_y и channel_x (0-включает канал, 1-отключает канал))
-							selI2C->writeByte(BMM_ADDRES, REG_BMM_CTRL_1, i&0x39|0xC2);											//	Выполняем принудительное чтение данных с подачей положительного тока на катушку индуктивности (сохраняем значение переменной i обратно в регистр REG_BMM_CTRL_1 предварительно записав значения «11» в биты advanced_self_test<1:0> и «01» в биты op_mode<1:0>)
+							selI2C->writeByte(BMM_ADDRES, REG_BMM_CTRL_1, (i&0x39)|0xC2);											//	Выполняем принудительное чтение данных с подачей положительного тока на катушку индуктивности (сохраняем значение переменной i обратно в регистр REG_BMM_CTRL_1 предварительно записав значения «11» в биты advanced_self_test<1:0> и «01» в биты op_mode<1:0>)
 					while ((selI2C->readByte (BMM_ADDRES, REG_BMM_CTRL_1) & 0x06) != 0x06){;}									//	Ждём входа в спящий режим (будут установлены биты op_mode<1:0>), модуль сам переходит в спящий режим после выполнения одного считывания в принудительном режиме
 							readADC(); k[0] = (float) mag_adc[2] * varQuantum;													//	Читаем показания АЦП магнитометра в массив mag_adc. Преобразуем показание оси Z в мГс и сохраняем его в 0 ячейке массива k
-							selI2C->writeByte(BMM_ADDRES, REG_BMM_CTRL_1, i&0x39|0x82);											//	Выполняем принудительное чтение данных с подачей отрицательного тока на катушку индуктивности (сохраняем значение переменной i обратно в регистр REG_BMM_CTRL_1 предварительно записав значения «10» в биты advanced_self_test<1:0> и «01» в биты op_mode<1:0>)
+							selI2C->writeByte(BMM_ADDRES, REG_BMM_CTRL_1, (i&0x39)|0x82);											//	Выполняем принудительное чтение данных с подачей отрицательного тока на катушку индуктивности (сохраняем значение переменной i обратно в регистр REG_BMM_CTRL_1 предварительно записав значения «10» в биты advanced_self_test<1:0> и «01» в биты op_mode<1:0>)
 					while ((selI2C->readByte (BMM_ADDRES, REG_BMM_CTRL_1) & 0x06) != 0x06){;}									//	Ждём входа в спящий режим (будут установлены биты op_mode<1:0>), модуль сам переходит в спящий режим после выполнения одного считывания в принудительном режиме
 							readADC(); k[1] = (float) mag_adc[2] * varQuantum;													//	Читаем показания АЦП магнитометра в массив mag_adc. Преобразуем показание оси Z в мГс и сохраняем его в 1 ячейке массива k
 							selI2C->writeByte(BMM_ADDRES, REG_BMM_INT_EN_1, j);													//	Возврашаем исходные значения регистру REG_BMM_INT_EN_1 из переменной j
