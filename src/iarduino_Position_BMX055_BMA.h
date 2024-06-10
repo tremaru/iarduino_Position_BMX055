@@ -206,11 +206,11 @@ class iarduino_Position_BMX055_BMA: public iarduino_Position_BMX055_BASE{							
 						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x80);												//	Сбрасываем все значения регистров компенсаций смещения в 0 (установкой флага offset_reset)
 						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_SETTING, 0x20);												//	Устанавливаем значения компенсации смещения в X=0g, Y=0g, Z=+1g (offset_target_z=«01», offset_target_y=«00», offset_target_x=«00», cut_off=«0»)
 						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x20);												//	Вычисляем смещение для оси X (cal_trigger=«01» быстрое вычисление компенсации смешения)
-				do{ i = selI2C->readByte (BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while (i&0x10==0);				//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
+				do{ i = selI2C->readByte (BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while ((i&0x10)==0);				//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
 						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x40);												//	Вычисляем смещение для оси Y (cal_trigger=«10» быстрое вычисление компенсации смешения)
-				do{ i = selI2C->readByte (BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while (i&0x10==0);				//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
+				do{ i = selI2C->readByte (BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while ((i&0x10)==0);				//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
 						selI2C->writeByte(BMA_ADDRES, REG_BMA_OFC_CTRL,    0x60);												//	Вычисляем смещение для оси Z (cal_trigger=«11» быстрое вычисление компенсации смешения)
-				do{ i = selI2C->readByte (BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while (i&0x10==0);				//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
+				do{ i = selI2C->readByte (BMA_ADDRES, REG_BMA_OFC_CTRL         ); delay(10);} while ((i&0x10)==0);				//	Ждём завершения быстрой компенсации смещения (ждём пока установится флаг cal_rdy)
 		}																														//
 																																//
 //		Функции не используемые акселерометром:																					//
