@@ -201,9 +201,9 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 							if( mag_min[i]>mag_adc[i] ){ mag_min[i]=mag_adc[i]; }												//	Определяем минимум  для оси mag_min[i] из текущих прочитанных данных оси mag_adc[i].
 						}																										//
 					//	Определяем смещение показаний:																			//
-						magBias[0] = float((int32_t)(mag_max[0]+mag_min[0])/2) * varQuantum;									//	среднее значение показаний АЦП по оси X умножаем на шаг квантования varQuantum и получаем смещение показаний оси в мГс
-						magBias[1] = float((int32_t)(mag_max[1]+mag_min[1])/2) * varQuantum;									//	среднее значение показаний АЦП по оси Y умножаем на шаг квантования varQuantum и получаем смещение показаний оси в мГс
-						magBias[2] = float((int32_t)(mag_max[2]+mag_min[2])/2) * varQuantum;									//	среднее значение показаний АЦП по оси Z умножаем на шаг квантования varQuantum и получаем смещение показаний оси в мГс
+						magBias[0] = float(((int32_t)mag_max[0]+(int32_t)mag_min[0])/2) * varQuantum;									//	среднее значение показаний АЦП по оси X умножаем на шаг квантования varQuantum и получаем смещение показаний оси в мГс
+						magBias[1] = float(((int32_t)mag_max[1]+(int32_t)mag_min[1])/2) * varQuantum;									//	среднее значение показаний АЦП по оси Y умножаем на шаг квантования varQuantum и получаем смещение показаний оси в мГс
+						magBias[2] = float(((int32_t)mag_max[2]+(int32_t)mag_min[2])/2) * varQuantum;									//	среднее значение показаний АЦП по оси Z умножаем на шаг квантования varQuantum и получаем смещение показаний оси в мГс
 					}																											//
 				//	Сбрасываем накопленные значения:																			//
 					if( offset==BMM_RESET ){																					//
