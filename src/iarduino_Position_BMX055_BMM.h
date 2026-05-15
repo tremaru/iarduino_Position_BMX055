@@ -175,7 +175,7 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 //		Установка полосы пропускания для фильтрованных данных:																	//
 		void	setBandwidths(uint8_t bandwidths){																				//	Аргумент: полоса пропускания
 					uint8_t i=0;																								//	Значение для записи в регистр REG_BMM_CTRL_1.
-					switch (bandwidths){																						//	Проверяем значение аргумента функции (максимальное детектируемое угловое ускорение)
+					switch (bandwidths){																						//	Проверяем значение аргумента функции (максимальная детектируемая магнитная индукция)
 						default:		bandwidths=BMM_10Hz;																	//	Если значение некорректное, то меняем его на BMM_10Hz (значение по умолчанию).
 						case BMM_10Hz:	i=0x00; break;																			//	Для полосы пропускания 10 Гц нужно записать i в биты data_rate<2:0> регистра REG_BMM_CTRL_1.
 						case BMM_2Hz:	i=0x01; break;																			//	Для полосы пропускания  2 Гц нужно записать i в биты data_rate<2:0> регистра REG_BMM_CTRL_1.
