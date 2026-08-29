@@ -13,6 +13,7 @@ class iarduino_Position_BMX055_FILTER_MADGWICK_NO_BMM: public iarduino_Position_
 
 //		Функция выполнения фильтра Маджвика:
 		void	filter(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz, float*q1, float*q2, float*q3, float*q4 ,float deltat){
+					(void)(mx); (void)(my); (void)(mz);
 					float norm;
 					float s1, s2, s3, s4;
 					float qDot1, qDot2, qDot3, qDot4;

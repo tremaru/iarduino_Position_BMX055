@@ -68,6 +68,7 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 	/**	функции доступные пользователю **/																						//
 //		Инициализация датчика:																									//
 		bool	begin(iarduino_I2C_Select* ptrI2C, bool setZero, float*ptrX,float*ptrY,float*ptrZ,float*ptrT, float*ptrQ1,float*ptrQ2,float*ptrQ3,float*ptrQ4 ){ // Аргументы: ptrI2C - указатель на объект работы с шиной I2C, setZero - неиспользуемый флаг, указатели на переменные выводимых данных)
+					(void)(setZero); (void)(ptrQ1); (void)(ptrQ2); (void)(ptrQ3); (void)(ptrQ4);								//	Избавляемся от предупреждения неиспользуемых параметров.
 					selI2C    = ptrI2C;																							//	Присваиваем указателю selI2C адрес из указателя ptrI2C
 					axisX     = ptrX;																							//	Присваиваем указателю axisX  адрес из указателя ptrX который ссылается на переменную axisX класса iarduino_Position_BMX055 предназначенную для вывода данных по оси X
 					axisY     = ptrY;																							//	Присваиваем указателю axisY  адрес из указателя ptrY который ссылается на переменную axisY класса iarduino_Position_BMX055 предназначенную для вывода данных по оси Y
@@ -118,10 +119,10 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 							selI2C->writeByte(BMM_ADDRES, REG_BMM_CTRL_1, i|0x06);												//	Переходим в спящий режим (сохраняем значение переменной i обратно в регистр REG_BMM_CTRL_1 предварительно установив биты op_mode<1:0>
 					j = 	selI2C->readByte (BMM_ADDRES, REG_BMM_INT_EN_1);													//	Читаем значение регистра REG_BMM_INT_EN_1 в переменную j
 							selI2C->writeByte(BMM_ADDRES, REG_BMM_INT_EN_1, j|0x18);											//	Отключаем каналы осей X и Y (сохраняем значение переменной j обратно в регистр REG_BMM_INT_EN_1 предварительно установив биты channel_y и channel_x (0-включает канал, 1-отключает канал))
-							selI2C->writeByte(BMM_ADDRES, REG_BMM_CTRL_1, i&0x39|0xC2);											//	Выполняем принудительное чтение данных с подачей положительного тока на катушку индуктивности (сохраняем значение переменной i обратно в регистр REG_BMM_CTRL_1 предварительно записав значения «11» в биты advanced_self_test<1:0> и «01» в биты op_mode<1:0>)
+							selI2C->writeByte(BMM_ADDRES, REG_BMM_CTRL_1, (i&0x39)|0xC2);										//	Выполняем принудительное чтение данных с подачей положительного тока на катушку индуктивности (сохраняем значение переменной i обратно в регистр REG_BMM_CTRL_1 предварительно записав значения «11» в биты advanced_self_test<1:0> и «01» в биты op_mode<1:0>)
 					while ((selI2C->readByte (BMM_ADDRES, REG_BMM_CTRL_1) & 0x06) != 0x06){;}									//	Ждём входа в спящий режим (будут установлены биты op_mode<1:0>), модуль сам переходит в спящий режим после выполнения одного считывания в принудительном режиме
 							readADC(); k[0] = (float) mag_adc[2] * varQuantum;													//	Читаем показания АЦП магнитометра в массив mag_adc. Преобразуем показание оси Z в мГс и сохраняем его в 0 ячейке массива k
-							selI2C->writeByte(BMM_ADDRES, REG_BMM_CTRL_1, i&0x39|0x82);											//	Выполняем принудительное чтение данных с подачей отрицательного тока на катушку индуктивности (сохраняем значение переменной i обратно в регистр REG_BMM_CTRL_1 предварительно записав значения «10» в биты advanced_self_test<1:0> и «01» в биты op_mode<1:0>)
+							selI2C->writeByte(BMM_ADDRES, REG_BMM_CTRL_1, (i&0x39)|0x82);											//	Выполняем принудительное чтение данных с подачей отрицательного тока на катушку индуктивности (сохраняем значение переменной i обратно в регистр REG_BMM_CTRL_1 предварительно записав значения «10» в биты advanced_self_test<1:0> и «01» в биты op_mode<1:0>)
 					while ((selI2C->readByte (BMM_ADDRES, REG_BMM_CTRL_1) & 0x06) != 0x06){;}									//	Ждём входа в спящий режим (будут установлены биты op_mode<1:0>), модуль сам переходит в спящий режим после выполнения одного считывания в принудительном режиме
 							readADC(); k[1] = (float) mag_adc[2] * varQuantum;													//	Читаем показания АЦП магнитометра в массив mag_adc. Преобразуем показание оси Z в мГс и сохраняем его в 1 ячейке массива k
 							selI2C->writeByte(BMM_ADDRES, REG_BMM_INT_EN_1, j);													//	Возврашаем исходные значения регистру REG_BMM_INT_EN_1 из переменной j
@@ -137,7 +138,7 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 					if(!readADC()){return false;}																				//	Читаем показания АЦП магнитометра в массив mag_adc
 					float j = 1;																								//	Определяем множитель
 					switch(thisMera){																							//	В зависимости от установленной меры измерений
-						default:		thisMera=BMM_MG;																		//	По умолчанию значения возвращаются в мГс
+						default:		thisMera=BMM_MG; /* FALLTHROUGH */														//	По умолчанию значения возвращаются в мГс
 						case BMM_MG:	j=1.0f; break;																			//	Если данные требуется возвращать в мГс
 						case BMM_MCT:	j=0.1f; break;																			//	Если данные требуется возвращать в мкТл
 					}																											//	Результирующее значение получается из скорректированных данных АЦП (mag_adc) умноженных на шаг квантования (varQuantum) с вычетом вычисленного смещения (magBias) и преобразованного в требуемую величину измерений
@@ -161,7 +162,7 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 		void	setScale(uint8_t scale){																						//	Аргумент: предустановленный режим
 					uint8_t rep_xy, rep_z, data_rate;																			//	Объявляем переменные для хранения количества выборок по осям XY, Z и требуемой для них полосы пропускания.
 					switch (scale){																								//	Проверяем значение аргумента функции (1 из 4 возможных предустановленных режимов работы магнитометра)
-						default:		  	scale=BMM_REGULAR;																	//	Если значение некорректное, то меняем его на BMM_REGULAR (обычный предустановленный режим)
+						default:		  	scale=BMM_REGULAR; /* FALLTHROUGH */												//	Если значение некорректное, то меняем его на BMM_REGULAR (обычный предустановленный режим)
 						case BMM_LOW_PWR:	rep_xy=3;				rep_z=3;		data_rate=BMM_10Hz; break;					//	Экономичный предустановленный режим     -  3 выборки для осей XY,  3 выборки для оси Z, рекомендуемая полоса пропускания 10 Гц, шумы по осям X/Y/Z = 1.0/1.0/1.4 мкТл, среднее потребление тока 0.17 мА.
 						case BMM_REGULAR:	rep_xy=9;				rep_z=15;		data_rate=BMM_10Hz; break;					//	Обычный     прдуустановленный режим     -  9 выборок для осей XY, 15 выборок для оси Z, рекомендуемая полоса пропускания 10 Гц, шумы по осям X/Y/Z = 0.6/0.6/0.6 мкТл, среднее потребление тока 0.50 мА.
 						case BMM_ENHANCED:	rep_xy=15;				rep_z=27;		data_rate=BMM_10Hz; break;					//	Улучшенный  прдуустановленный режим     - 15 выборок для осей XY, 27 выборок для оси Z, рекомендуемая полоса пропускания 10 Гц, шумы по осям X/Y/Z = 0.5/0.5/0.5 мкТл, среднее потребление тока 0.80 мА.
@@ -176,7 +177,7 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 		void	setBandwidths(uint8_t bandwidths){																				//	Аргумент: полоса пропускания
 					uint8_t i=0;																								//	Значение для записи в регистр REG_BMM_CTRL_1.
 					switch (bandwidths){																						//	Проверяем значение аргумента функции (максимальная детектируемая магнитная индукция)
-						default:		bandwidths=BMM_10Hz;																	//	Если значение некорректное, то меняем его на BMM_10Hz (значение по умолчанию).
+						default:		bandwidths=BMM_10Hz; /* FALLTHROUGH */													//	Если значение некорректное, то меняем его на BMM_10Hz (значение по умолчанию).
 						case BMM_10Hz:	i=0x00; break;																			//	Для полосы пропускания 10 Гц нужно записать i в биты data_rate<2:0> регистра REG_BMM_CTRL_1.
 						case BMM_2Hz:	i=0x01; break;																			//	Для полосы пропускания  2 Гц нужно записать i в биты data_rate<2:0> регистра REG_BMM_CTRL_1.
 						case BMM_6Hz:	i=0x02; break;																			//	Для полосы пропускания  6 Гц нужно записать i в биты data_rate<2:0> регистра REG_BMM_CTRL_1.
@@ -242,7 +243,7 @@ class iarduino_Position_BMX055_BMM: public iarduino_Position_BMX055_BASE{							
 		bool	readADC(void){																									//	Аргумент: отсутствует
 					uint8_t i[8]; if( !selI2C->readBytes(BMM_ADDRES, REG_BMM_X_LSB, i, 8) ){ return false; }					//	Читаем 8 байт регистров АЦП начиная с регистра REG_BMM_X_LSB в объявленный массив i
 					uint16_t j = ( ((uint16_t)i[7]<<8) | (uint16_t)i[6] )>>2;													//	Получаем сопростивление по которому будет рассчитана температура
-					if(i[6] & 0x01 == 0){return false;}																			//	Если не установлен бит data_ready регистра REG_BMM_TEMP_LSB, значит данные не новые
+					if( (i[6]&0x01) == 0 ){ return false; }																		//	Если не установлен бит data_ready регистра REG_BMM_TEMP_LSB, значит данные не новые
 			/* T */ mag_adc[3] = (int16_t)(((int32_t)dig_xyz1<<14)/(int32_t)(j!=0? j:dig_xyz1))-(int16_t)0x4000;				//	Рассчитываем температуру по полученному сопротивлению
 			/* X */ mag_adc[0] = (int16_t)(dig_x1<<3)+(int16_t)(((int32_t)((int16_t)(((uint16_t)i[1]<<8)|(uint16_t)i[0])>>3)*((((((int32_t)dig_xy2*(((int32_t)mag_adc[3]*(int32_t)mag_adc[3])>>7)+(int32_t)mag_adc[3]*(int32_t)((int16_t)dig_xy1<<7))>>9)+(int32_t)0x100000)*(int32_t)((int16_t)dig_x2+(int16_t)0xA0))>>12))>>13);	// Получаем значение АЦП для оси X и корректируем его
 			/* Y */ mag_adc[1] = (int16_t)(dig_y1<<3)+(int16_t)(((int32_t)((int16_t)(((uint16_t)i[3]<<8)|(uint16_t)i[2])>>3)*((((((int32_t)dig_xy2*(((int32_t)mag_adc[3]*(int32_t)mag_adc[3])>>7)+(int32_t)mag_adc[3]*(int32_t)((int16_t)dig_xy1<<7))>>9)+(int32_t)0x100000)*(int32_t)((int16_t)dig_y2+(int16_t)0xA0))>>12))>>13);	// Получаем значение АЦП для оси Y и корректируем его

@@ -22,7 +22,7 @@ class iarduino_Position_BMX055_FILTER{																							//	Определя
 };																																//
 class iarduino_Position_BMX055_NO_FILTER: public iarduino_Position_BMX055_FILTER{												//	Определяем производный класс
 	public:																														//	Определяем функции которые будут выполняться если не назначен ни один из фильтров получения кватернионов
-		void	filter(float ax,float ay,float az,float gx,float gy,float gz,float mx,float my,float mz,float*q01,float*q02,float*q03,float*q04,float i){*q01=1.0f; *q02=0.0f; *q03=0.0f; *q04=0.0f;}
+		void	filter(float ax,float ay,float az,float gx,float gy,float gz,float mx,float my,float mz,float*q01,float*q02,float*q03,float*q04,float i){*q01=1.0f; *q02=0.0f; *q03=0.0f; *q04=0.0f; (void)(ax); (void)(ay); (void)(az); (void)(gx); (void)(gy); (void)(gz); (void)(mx); (void)(my); (void)(mz); (void)(i); }
 		uint8_t	getFilter(void){return NO_FILTER;}																				//
 };																																//
 																																//
@@ -108,7 +108,7 @@ class iarduino_Position_BMX055_ALL: public iarduino_Position_BMX055_BASE{							
 					objFilter->filter(BMAx,BMAy,BMAz,BMGx,BMGy,BMGz,BMMx,BMMy,BMMz,q1,q2,q3,q4,timeUpdate);						//	Вызываем функцию чтения кватернионов,         которые запишутся в переменные q1, q2, q3, q4.
 					float j = 1;																								//	Определяем множитель
 					switch(thisMera){																							//	В зависимости от установленной меры измерений
-						default:	thisMera=BMX_DEG;																			//	По умолчанию значения углов Эйлера возвращаются в градусах
+						default:	thisMera=BMX_DEG; /* FALLTHROUGH */															//	По умолчанию значения углов Эйлера возвращаются в градусах
 						case		BMX_DEG:	j=180.0f/PI;	break;															//	Если данные требуется возвращать в градусах
 						case		BMX_RAD:	j=1.0f;			break;															//	Если данные требуется возвращать в радианах
 						case		BMX_M_S:	j=1.0f;			break;															//	Если данные требуется возвращать в м/с²         истинного ускорения, то сначала нужно получить углы Эйлера в радианах.
